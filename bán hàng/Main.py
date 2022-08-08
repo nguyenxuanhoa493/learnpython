@@ -1,5 +1,7 @@
 import csv
+from importlib.metadata import packages_distributions
 import os
+from turtle import goto
 
 class Goods:
     def __init__(self, code, name, price):
@@ -31,20 +33,53 @@ class List_Goods:
         self.list.append(item)
         self.save()
 
-    def update_item(self,index,item):
-        self.list[index-1].code=item.code
-        self.list[index-1].name=item.name
-        self.list[index-1].price=item.price
-        self.save()
-    
-    def del_item(self,index):
-        self.list.pop(index-1)
-        self.save()
-
     def print_list(self):
-        for i in self.list:
-            print(i.code,"-",i.name,'-',i.price)
-            
+        os.system('cls||clear')
+        print("-"*LINE)
+        print("|{:<39}{:<59}|".format(" ","DANH SÁCH HÀNG HOÁ"))
+        print("-"*LINE)
+        print("| STT | {:<20} | {:<44} | {:<12}(Ngàn/kg)|".format("Mã sản phẩm","Tên sản phẩm","Giá bán"))
+        print("-"*LINE)
+        for i in range(len(self.list)):
+            print("| {:<3} | {:<20} | {:<44} | {:<21}|".format(i+1,self.list[i].code,self.list[i].name,self.list[i].price))
+            print("-"*LINE)
+        self.print_menu()
+        
+    def print_menu(self):
+        while True:
+            print("|{:<47}{:<51}|".format(" ","MENU"))
+            print("-"*LINE)
+            print("|{:<27} | {:<30} | {:<21} | {:<10}|".format("1. Thêm sản phẩm","2. Sửa sản phẩm","3. Xoá sản phẩm","4. Quay lại"))
+            print("-"*LINE) 
+            action = input('Mời chọn chức năng: ')
+            if action =='1':
+                temp=["","",""]
+                temp[0] = input('Mời nhập mã sản phẩm: ')
+                temp[1] = input('Mời nhập tên sản phẩm: ')
+                temp[2] = input('Mời nhập giá bán (Ngàn/Kg): ')
+                self.add_item(Goods(temp[0],temp[1],temp[2]))
+                self.print_list()
+
+            elif action =='2':
+                index_edit = int(input("Mời nhập STT sản phẩm cần sửa: "))-1
+                self.list[index_edit].code = input("Mã sản phẩm : {:<21} ->: ".format(self.list[index_edit].code))
+                self.list[index_edit].name = input("Tên sản phẩm : {:<20} ->: ".format(self.list[index_edit].name))
+                self.list[index_edit].price = input("Giá sản phẩm : {:<20} ->: ".format(self.list[index_edit].price))
+                self.save()
+                self.print_list()
+
+            elif action =='3':
+                index_del =  int(input("Mời nhập STT sản phẩm cần xoá: "))-1
+                item_del=self.list.pop(index_del)
+                self.save()
+                self.print_list()
+            elif action=='4':
+                main()
+
+            else:
+                self.print_list()
+                continue
+    
     def save(self):
         list1=[]
         for i in self.list:
@@ -53,179 +88,100 @@ class List_Goods:
         with open(self.db, 'w',encoding="UTF8") as file:
                 writer = csv.writer(file)
                 writer.writerow(self.headers)
-                writer.writerows(list1)
+                writer.writerows(list1) 
 
-def read_item():
-    with open(PATH_ITEM_CSV, newline='\n') as f:
-        list1 = csv.reader(f)
-        list1 = list(list1)
-        header=list1.pop(0)
-        list2=[]
-        for i in list1:
-            temp= Goods(i[0],i[1],i[2])
-            list2.append(temp)
-        return list2
+class List_customer:
+    def __init__(self):
+        self.list=[]
+        self.db = os.path.dirname(__file__)+'/data/customer.csv'
+        self.headers=["phone","name","adress"]
+    
+    def read_db(self):
+        with open(self.db, newline='\n') as f:
+            list_temp = csv.reader(f)
+            temp = list(list_temp)
+            header=temp.pop(0)
+            for i in temp:
+                item = Customer(i[0],i[1],i[2])
+                self.list.append(item)
 
-def show_menu_item(list):
-    os.system('cls||clear')
-    print_all_list(list)
-    print_menu_item(list)
+    def add_item(self,item):
+        self.list.append(item)
+        self.save()
 
-def print_menu_item(list):
-    while True:
-        print("|{:<47}{:<51}|".format(" ","MENU"))
+    def print_list(self):
+        os.system('cls||clear')
         print("-"*LINE)
-        print("|{:<27} | {:<30} | {:<21} | {:<10}|".format("1. Thêm sản phẩm","2. Sửa sản phẩm","3. Xoá sản phẩm","4. Quay lại"))
-        print("-"*LINE) 
-        action = input('Mời chọn chức năng: ')
-        if action =='1':
-            add_item()
-            show_menu_item(read_item())
-
-        elif action =='2':
-            index_edit = int(input("Mời nhập STT sản phẩm cần sửa: "))-1
-            list[index_edit].code = input("Mã sản phẩm : {:<20} ->: ".format(list[index_edit].code))
-            list[index_edit].name = input("Tên sản phẩm : {:<20} ->: ".format(list[index_edit].name))
-            list[index_edit].price = input("Giá sản phẩm : {:<20} ->: ".format(list[index_edit].price))
-            save_item_to_file(list)
-            show_menu_item(read_item())
-
-        elif action =='3':
-            index_del =  int(input("Mời nhập STT sản phẩm cần xoá: "))-1
-            item_del=list.pop(index_del)
-            save_item_to_file(list)
-            show_menu_item(read_item())
-        elif action=='4':
-            show_menu()
-        else:
-            show_menu_item(read_item())
-            continue
-
-def add_item():
-    temp=["","",""]
-    temp[0] = input('Mời nhập mã sản phẩm: ')
-    temp[1] = input('Mời nhập tên sản phẩm: ')
-    temp[2] = input('Mời nhập giá bán (Ngàn/Kg): ')
-    with open(PATH_ITEM_CSV, 'a',encoding="UTF8") as file:
-        writer = csv.writer(file)
-        writer.writerow(temp)     
-
-def read_customer():
-    with open(PATH_CUSTOMER_CSV, newline='\n') as f:
-        list1 = csv.reader(f)
-        list1 = list(list1)
-        header=list1.pop(0)
-        list2=[]
-        for i in list1:
-            temp= Customer(i[0],i[1],i[2])
-            list2.append(temp)
-        return list2
-
-def save_item_to_file(list):
-    headers=["code","name","price"]
-    list1=[]
-    for i in list:
-        temp = [i.code,i.name,i.price]
-        list1.append(temp)
-    with open(PATH_ITEM_CSV, 'w',encoding="UTF8") as file:
-        writer = csv.writer(file)
-        writer.writerow(headers)
-        writer.writerows(list1)   
-
-def print_all_list(list):
-    print("-"*LINE)
-    print("|{:<39}{:<59}|".format(" ","DANH SÁCH HÀNG HOÁ"))
-    print("-"*LINE)
-    print("| STT | {:<20} | {:<44} | {:<12}(Ngàn/kg)|".format("Mã sản phẩm","Tên sản phẩm","Giá bán"))
-    print("-"*LINE)
-    for i in range(len(list)):
-        print("| {:<3} | {:<20} | {:<44} | {:<21}|".format(i+1,list[i].code,list[i].name,list[i].price))
+        print("|{:<39}{:<59}|".format(" ","DANH SÁCH KHÁCH HÀNG"))
         print("-"*LINE)
-
-def show_menu_customer(list):
-    os.system('cls||clear')
-    print_all_list_cumtomer(list)
-    print_menu_customer(list)
-
-def print_menu_customer(list):
-    while True:
-        print("|{:<47}{:<51}|".format(" ","MENU"))
+        print("| STT | {:<21} | {:<32} | {:<31} |".format("Số điện thoại","Họ và tên","Địa chỉ"))
         print("-"*LINE)
-        print("|{:<27} | {:<30} | {:<21} | {:<10} |".format("1. Thêm khách hàng","2. Sửa thông tin","3. Xoá khách hàng","4.Quay lại"))
-        print("-"*LINE) 
-        action = input('Mời chọn chức năng: ')
-        if action =='1':
-            add_cumtomer()
-            show_menu_customer(read_customer())
+        for i in range(len(self.list)):
+            print("| {:<3} | {:<21} | {:<32} | {:<32}|".format(i+1,self.list[i].phone,self.list[i].name,self.list[i].adress))
+            print("-"*LINE)
+        self.print_menu()
+        
+    def print_menu(self):
+        while True:
+            print("|{:<47}{:<51}|".format(" ","MENU"))
+            print("-"*LINE)
+            print("|{:<27} | {:<30} | {:<21} | {:<10} |".format("1. Thêm khách hàng","2. Sửa thông tin","3. Xoá khách hàng","4.Quay lại"))
+            print("-"*LINE) 
+            action = input('Mời chọn chức năng: ')
+            if action =='1':
+                temp=["","",""]
+                temp[0] = input('Mời nhập số điên thoại: ')
+                temp[1] = input('Mời nhập tên khách hàng: ')
+                temp[2] = input('Mời nhập địa chỉ: ')
+                self.add_item(Customer(temp[0],temp[1],temp[2]))
+                self.print_list()
 
-        elif action =='2':
-            index_edit = int(input("Mời nhập STT khách hàng cần sửa: "))-1
-            list[index_edit].phone = input("Số điện thoại : {:<20} ->: ".format(list[index_edit].phone))
-            list[index_edit].name = input("Họ và tên : {:<20} ->: ".format(list[index_edit].name))
-            list[index_edit].adress = input("Địa chỉ : {:<20} ->: ".format(list[index_edit].adress))
-            save_customer_to_file(list)
-            show_menu_customer(read_customer())
+            elif action =='2':
+                index_edit = int(input("Mời nhập STT khách hàng cần sửa: "))-1
+                self.list[index_edit].phone = input("Số điện thoại : {:<20} ->: ".format(self.list[index_edit].phone))
+                self.list[index_edit].name = input("Họ và tên : {:<20} ->: ".format(self.list[index_edit].name))
+                self.list[index_edit].adress = input("Địa chỉ : {:<20} ->: ".format(self.list[index_edit].adress))
+                self.save()
+                self.print_list()
 
-        elif action =='3':
-            index_del =  int(input("Mời nhập STT sản phẩm cần xoá: "))-1
-            item_del=list.pop(index_del)
-            save_customer_to_file(list)
-            show_menu_customer(read_customer())
-        elif action=='4':
-            show_menu()
-        else:
-            show_menu_customer(read_customer())
-            continue
+            elif action =='3':
+                index_del =  int(input("Mời nhập STT khách hàng cần xoá: "))-1
+                item_del=self.list.pop(index_del)
+                self.save()
+                self.print_list()
+            elif action=='4':
+                main()
 
-def add_cumtomer():
-    temp=["","",""]
-    temp[0] = input('Mời nhập số điên thoại: ')
-    temp[1] = input('Mời nhập tên khách hàng: ')
-    temp[2] = input('Mời nhập địa chỉ: ')
-    with open(PATH_CUSTOMER_CSV, 'a',encoding="UTF8") as file:
-        writer = csv.writer(file)
-        writer.writerow(temp)  
+            else:
+                self.print_list()
+                continue
+    
+    def save(self):
+        list1=[]
+        for i in self.list:
+            temp = [i.phone,i.name,i.adress]
+            list1.append(temp)
+        with open(self.db, 'w',encoding="UTF8") as file:
+                writer = csv.writer(file)
+                writer.writerow(self.headers)
+                writer.writerows(list1) 
 
-def save_customer_to_file(list):
-    headers=["phone","name","adress"]
-    list1=[]
-    for i in list:
-        temp = [i.phone,i.name,i.adress]
-        list1.append(temp)
-    with open(PATH_CUSTOMER_CSV, 'w',encoding="UTF8") as file:
-        writer = csv.writer(file)
-        writer.writerow(headers)
-        writer.writerows(list1)   
-
-def print_all_list_cumtomer(list):
-    print("-"*LINE)
-    print("|{:<39}{:<59}|".format(" ","DANH SÁCH KHÁCH HÀNG"))
-    print("-"*LINE)
-    print("| STT | {:<21} | {:<32} | {:<31} |".format("Số điện thoại","Họ và tên","Địa chỉ"))
-    print("-"*LINE)
-    for i in range(len(list)):
-        print("| {:<3} | {:<21} | {:<32} | {:<32}|".format(i+1,list[i].phone,list[i].name,list[i].adress))
-        print("-"*LINE)
-
-def show_menu():
+def main():
     os.system('cls||clear')
     while True:
         print('1.Quản lý hàng hoá                       2. Quản lý khách hàng')
         action = input('Mời chọn menu: ')
         if action=='1':
-            show_menu_item(read_item())
+            items.print_list()
         elif action == '2':
-            show_menu_customer(read_customer())
+            customers.print_list()
         else:
             continue
 
 LINE=100
-PATH_ITEM_CSV = os.path.dirname(__file__)+'/data/item.csv'
-PATH_CUSTOMER_CSV = os.path.dirname(__file__)+'/data/customer.csv'
-list_item = List_Goods()
-list_item.read_db()
-
-def main():
-
-        show_menu()      
-main()        
+items =List_Goods()
+items.read_db()
+customers = List_customer()
+customers.read_db()
+# list_item.del_item(1)
+main()
