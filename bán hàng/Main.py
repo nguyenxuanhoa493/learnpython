@@ -8,6 +8,9 @@ class Goods:
         self.code = code
         self.name = name
         self.price = price
+        self.weigth=0
+    def update_weigth(self,weigth):
+        self.weigth=weigth
 class Customer:
     def __init__(self, phone, name, adress ):
         self.phone = phone
@@ -138,12 +141,11 @@ class Table:
                 writer = csv.writer(file)
                 writer.writerow(self.headers)
                 writer.writerows(list1) 
-
-
+        
 def main():
     os.system('cls||clear')
     while True:
-        print('1.Quản lý hàng hoá                       2. Quản lý khách hàng')
+        print('1. Quản lý hàng hoá     2. Quản lý khách hàng')
         action = input('Mời chọn menu: ')
         if action=='1':
             items.print_list()
@@ -157,5 +159,6 @@ items = Table('item')
 items.read_db()
 customers = Table('customer')
 customers.read_db()
-# list_item.del_item(1)
 main()
+# list_item.del_item(1)
+
